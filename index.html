@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4f4">
+  <title>Visor de documentos con firma digital</title>
+  <link rel="icon" href="https://www.senati.edu.pe/sites/all/themes/senati_theme/favicon/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Poppins, "Segoe UI", Arial, sans-serif;
+      color: #172033;
+      background: #f4f4f4;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 18px 28px 32px;
+    }
+
+    .page-header {
+      margin: 0 auto 25px;
+      text-align: center;
+    }
+
+    .brand-mark {
+      display: block;
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      margin: 0 auto 8px;
+    }
+
+    h1,
+    h2 {
+      color: #123fee;
+      font-weight: 600;
+    }
+
+    h1 {
+      margin: 20px 0 0;
+      line-height: 1.2;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(310px, 1fr);
+      align-items: start;
+      gap: 20px;
+      width: min(100%, 1250px);
+      margin: 0 auto;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 23px 20px 26px;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 3px 9px rgb(0 0 0 / 11%);
+    }
+
+    h2 {
+      margin: 0 0 13px;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .viewer {
+      overflow: hidden;
+      height: 530px;
+      border-radius: 3px;
+      background: #282828;
+    }
+
+    .pdf-viewer {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #282828;
+    }
+
+    .signatures-panel {
+      padding-bottom: 34px;
+    }
+
+    .signatures-panel h2 {
+      margin-bottom: 17px;
+    }
+
+    .signature-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .signature-card {
+      overflow: hidden;
+      border: 3px solid #42ad50;
+      border-radius: 7px;
+      background: #fafafa;
+    }
+
+    .signature-header {
+      display: flex;
+      align-items: center;
+    }
+
+    .signature-header h3 {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+    }
+
+    .signature-header::after {
+      flex: 0 0 auto;
+      margin: 0 16px 0 8px;
+      content: "➤";
+      color: #080808;
+      font-size: 16px;
+      line-height: 1;
+      transition: transform 0.3s;
+    }
+
+    .signature-header:has(.signature-button[aria-expanded="true"])::after {
+      transform: rotate(90deg);
+    }
+
+    .signature-button {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      min-height: 42px;
+      padding: 5px 8px 5px 16px;
+      border: 0;
+      color: inherit;
+      background: #f7f7f7;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 140ms ease;
+    }
+
+    .signature-button:hover,
+    .signature-button[aria-expanded="true"] {
+      background: #f2f2f2;
+    }
+
+    .signature-button:focus-visible {
+      position: relative;
+      z-index: 1;
+      outline: 3px solid #123fee;
+      outline-offset: -4px;
+    }
+
+    .signature-name {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: #333 !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+    }
+
+    .signature-details {
+      padding: 17px 22px 18px;
+      border-top: 1px solid #ededed;
+      color: #292929;
+      background-color: #fafafa;
+      line-height: 1.72;
+      overflow-wrap: anywhere;
+    }
+
+    .signature-details[hidden] {
+      display: none;
+    }
+
+    .signature-details p {
+      margin: 0 0 5px;
+    }
+
+    .signature-details p:last-child {
+      margin-bottom: 0;
+    }
+
+    .signature-details strong {
+      color: #5b5b5b;
+      font-weight: 700;
+    }
+
+    .status-message {
+      min-height: 20px;
+      margin: 13px 0 0;
+      color: #287c35;
+      font-size: 13px;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 18px 16px 28px;
+      }
+
+      .page-header {
+        margin-bottom: 20px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .viewer {
+        height: 430px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .panel {
+        padding: 18px 14px;
+      }
+
+      .signature-button {
+        min-height: 42px;
+        padding: 5px 8px 5px 12px;
+      }
+
+      .signature-details {
+        padding: 14px;
+      }
+
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <img class="brand-mark" src="https://diplomas-senati.plussigner.com/senati/verify/assets/logo.png" alt="Logo de SENATI">
+    <h1>Validador de Firmas</h1>
+  </header>
+
+  <main class="layout">
+    <section class="panel document-panel" aria-labelledby="document-heading">
+      <h2 id="document-heading">Documento</h2>
+      <div class="viewer">
+        <iframe
+          class="pdf-viewer"
+          src="uploads/documentos.pdf#toolbar=1&amp;navpanes=1&amp;pagemode=thumbs&amp;zoom=26"
+          title="Visor del documento PDF"
+        ></iframe>
+      </div>
+    </section>
+
+    <section class="panel signatures-panel" aria-labelledby="signatures-heading">
+      <h2 id="signatures-heading">Firmas Digitales</h2>
+      <div class="signature-list">
+        <article class="signature-card">
+          <div class="signature-header">
+            <h3><button class="signature-button" id="signature-toggle-0" type="button" aria-expanded="false" aria-controls="signature-details-0" data-signature="0">
+              <span class="signature-name">ROCIO GEOVANY TORO NORABUENA</span>
+            </button></h3>
+          </div>
+          <div class="signature-details" id="signature-details-0" hidden>
+            <p><strong>Fecha de Firma:</strong> 31-03-2026 10:33:28</p>
+            <p><strong>Tipo de Firma:</strong> PAdES (CAdES Detached)</p>
+            <p><strong>Serial del Certificado:</strong> 77E33C24FECA8DF1C6</p>
+            <p><strong>Hash:</strong> SHA-256</p>
+            <p><strong>Emisor:</strong> C=PE,ST=LIMA,L=LIMA,OU=see current address at www.camerfirma.com.pe/address,OU=AC CAMERFIRMA PERÚ CERTIFICADOS - 2016,SERIALNUMBER=20566302447,2.5.4.97=NTRPE-20566302447,O=CAMERFIRMA PERÚ S.A.C.,CN=AC CAMERFIRMA PERÚ CERTIFICADOS - 2016</p>
+            <p><strong>Validez:</strong> Válido</p>
+          </div>
+        </article>
+        <article class="signature-card">
+          <div class="signature-header">
+            <h3><button class="signature-button" id="signature-toggle-1" type="button" aria-expanded="false" aria-controls="signature-details-1" data-signature="1">
+              <span class="signature-name">WILLY JUAN HERNANDEZ LUJAN</span>
+            </button></h3>
+          </div>
+          <div class="signature-details" id="signature-details-1" hidden>
+            <p><strong>Fecha de Firma:</strong> 01-04-2026 07:32:21</p>
+            <p><strong>Tipo de Firma:</strong> PAdES (CAdES Detached)</p>
+            <p><strong>Serial del Certificado:</strong> 7B9D8A3E3C5B83E08E</p>
+            <p><strong>Hash:</strong> SHA-256</p>
+            <p><strong>Emisor:</strong> C=PE,ST=LIMA,L=LIMA,OU=see current address at www.camerfirma.com.pe/address,OU=AC CAMERFIRMA PERÚ CERTIFICADOS - 2016,SERIALNUMBER=20566302447,2.5.4.97=NTRPE-20566302447,O=CAMERFIRMA PERÚ S.A.C.,CN=AC CAMERFIRMA PERÚ CERTIFICADOS - 2016</p>
+            <p><strong>Validez:</strong> Válido</p>
+          </div>
+        </article>
+      </div>
+      <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script>
+    const signatureButtons = [...document.querySelectorAll(".signature-button")];
+
+    signatureButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const expanded = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", String(!expanded));
+        document.querySelector(`#${button.getAttribute("aria-controls")}`).hidden = expanded;
+      });
+    });
+  </script>
+</body>
+</html>
